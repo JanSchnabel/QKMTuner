@@ -44,8 +44,8 @@ from squlearn.kernel import QSVC, QSVR, QKRR
 from squlearn.kernel.optimization import KernelOptimizer, TargetAlignment
 from squlearn.optimizers.optimizer_base import OptimizerBase
 
-from .utils.scalers import BandwidthScaler, LabelMinMaxScaler, CustomLabelMinMaxScaler
-from .utils.circuits import z_encoding_circuit, zz_encoding_circuit
+from utils.scalers import BandwidthScaler, LabelMinMaxScaler, CustomLabelMinMaxScaler
+from utils.circuits import z_encoding_circuit, zz_encoding_circuit
 
 Scaler = (
     StandardScaler |
