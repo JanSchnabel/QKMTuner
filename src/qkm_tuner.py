@@ -44,8 +44,8 @@ from squlearn.kernel import QSVC, QSVR, QKRR
 from squlearn.kernel.optimization import KernelOptimizer, TargetAlignment
 from squlearn.optimizers.optimizer_base import OptimizerBase
 
-from scalers import BandwidthScaler, LabelMinMaxScaler, CustomLabelMinMaxScaler
-from circuits import z_encoding_circuit, zz_encoding_circuit
+from .utils.scalers import BandwidthScaler, LabelMinMaxScaler, CustomLabelMinMaxScaler
+from .utils.circuits import z_encoding_circuit, zz_encoding_circuit
 
 Scaler = (
     StandardScaler |
@@ -72,8 +72,49 @@ QuantumKernelMethod = (
 
 class QKMTuner:
     """
-    Optuna pipeline for finding hyperparameters of quantum kernel methods (QSVC, QSVR, QKRR).
+    This program combines the respective functionalities of sQUlearm, optuna and scikit-learn
+    to set up a extensive grid-search for quantum kernel methods (QKMs). As such, it supports
+    fidelity quantum kernels (FQKs) and projected quantum kernels (PQKs) with QKRR, QSVR and
+    QSVC approaches.
 
+    For all sQUlearn functionalities we refer to:
+     [1] The documentation: https://squlearn.github.io/index.html
+     [2] The Github repository: https://github.com/sQUlearn/squlearn
+     [3] The paper: https://arxiv.org/abs/2311.08990 
+
+    Args:
+        xtrain (np.ndarray): Training features of the respective dataset
+        xtest (np.ndarray): Test features of the respective dataset
+        ytrain (np.ndarray): Training labels/targets of the respective dataset
+        ytest (np.ndarray): Test labels/targets of the respective dataset
+        scaler_method (Union[Scaler, None]): Pre-scaling method for the features. Can be either 
+            one of scikit-learn's preprocssing methods 
+            (cf. https://scikit-learn.org/stable/api/sklearn.preprocessing.html) or one of the 
+            scaler defined in .utils.scalers
+        optimize_scaler (bool): Whether to optimize the feature ranges of the chosen scaler 
+            within the optuna hyperparameter optimization or not (default: False)
+        label_scaler (Scaler, None): Pre-scaling method for the targets. Can be either 
+            one of scikit-learn's preprocssing methods 
+            (cf. https://scikit-learn.org/stable/api/sklearn.preprocessing.html) or one of the 
+            scaler defined in .utils.scalers
+        quantum_kernel (str): A string specifying which quantum kernel to use, can be either "FQK"
+            or "PQK".
+        quantum_kernel_method (str): A string specifying which QKM to use. Possible values are:
+            "QKRR", "QSVR", and "QSVC"
+        clf_scoring (Optional[str]): A string specifying the scoring method to be used for 
+            classification tasks within the objective function leveraged by the optuna 
+            hyperparmater optimiation (default: "roc_auc"). See 
+            https://scikit-learn.org/stable/api/sklearn.metrics.html for details.
+        reg_scoring (Optional[str]): A string specifying the scoring method to be used for 
+            regression tasks within the objective function leveraged by the optuna 
+            hyperparmater optimiation (default: "neg_mean_squared_error"). See 
+            https://scikit-learn.org/stable/api/sklearn.metrics.html for details.
+        executor (Executor): The Executor of sQUlearn, see Refs. [1-3] for details. Default:
+            Executor("pennylane")
+        initial_parameters (Union[np.ndarray, None]): Initial parameters for the encoding circuit 
+            (default: None)
+        parameter_seed(Union[int, None]): Seed for the random number generator for the parameter
+            initialization, if initial_parameters is None.
     """
     def __init__(
         self,
@@ -161,7 +202,10 @@ class QKMTuner:
         n_jobs: int = 1,
         outdir: Union[str, None] = None,
         file_identifier: Union[str, None] = None #e.g., dataset_id
-    ):
+    ):  
+        """
+        Add doc.
+        """
         self._measurement = measurement
         self._outer_kernel = outer_kernel
         self._best_model = True
@@ -274,6 +318,9 @@ class QKMTuner:
         file_identifier: Union[str, None] = None #e.g., dataset_id
     ):
         """
+        Doc.
+        
+        
         Note that self.optimal_encoding_circuit and self.best_trial, which are subsequently used in 
         run_quantum_kernel_optimization() and evaluate_model_from_optimized_qkernel, correspond to 
         the best parameters found during optuna optimization for last encoding circuit in list 
