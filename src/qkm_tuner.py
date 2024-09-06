@@ -204,7 +204,28 @@ class QKMTuner:
         file_identifier: Union[str, None] = None #e.g., dataset_id
     ):  
         """
-        Add doc.
+        Method for studying hyperparameter importances and to find a best performing model.
+
+        Args:
+            encoding_circuits (list[EncodingCircuitBase]): A list of data encoding circuits
+                in the data format as defined by sQUlearn, cf. Refs. [1-3]
+            measurement (Union[str, ObservableBase, list]): A string or a data format as defined
+                by sQUlearn [1-3] for specifying the measurment operator O^k in the definition of the
+                projected quantum circuits used in PQKs. Thus this only works for PQKs.
+            outer_kernel (Union[str, OuterKernelBase]): A str our OuterKernelBase (sQUlearn) funciton
+                for defining the form of the outer kernel in the PQK definition.
+            num_qubits_max (int): Specifies the maximum number of qubits for the respective hyperparameter
+                search space.
+            num_layer_max (int): Specifies the maximum number of layers for the respective hyperparameter
+                search space.
+            optuna_sampler (): Optuna Sampler, cf. https://optuna.readthedocs.io/en/stable/reference/samplers/index.html
+            optuna_pruner (): Optuna Pruners, cf. https://optuna.readthedocs.io/en/stable/reference/pruners.html
+            n_trials (int): The number of trials for optuna hyperparmaer optimization in each process, cf.
+                https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html#optuna.study.Study.optimize
+            n_jobs (int): The number of parallel jobs, 
+                cf. https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html#optuna.study.Study.optimize
+            outdir (Union[str, None]): String for defining a directory where all results are stored.
+            file_identifier (Union[str, None]): A user-defined string used for file identification 
         """
         self._measurement = measurement
         self._outer_kernel = outer_kernel
@@ -318,9 +339,27 @@ class QKMTuner:
         file_identifier: Union[str, None] = None #e.g., dataset_id
     ):
         """
-        Doc.
+        Method for optimizing hyperparameters on a grid of n_qubits x n_layers.
         
-        
+        Args:
+            encoding_circuits (list[EncodingCircuitBase]): A list of data encoding circuits
+                in the data format as defined by sQUlearn, cf. Refs. [1-3]
+            measurement (Union[str, ObservableBase, list]): A string or a data format as defined
+                by sQUlearn [1-3] for specifying the measurment operator O^k in the definition of the
+                projected quantum circuits used in PQKs. Thus this only works for PQKs.
+            outer_kernel (Union[str, OuterKernelBase]): A str our OuterKernelBase (sQUlearn) funciton
+                for defining the form of the outer kernel in the PQK definition.
+            qubit_list (list[int]): Specifies the qubit configurations to loop ofer in the grid search
+            num_layer_max (int): Specifies the layer configurations to loop ofer in the grid search
+            optuna_sampler (): Optuna Sampler, cf. https://optuna.readthedocs.io/en/stable/reference/samplers/index.html
+            optuna_pruner (): Optuna Pruners, cf. https://optuna.readthedocs.io/en/stable/reference/pruners.html
+            n_trials (int): The number of trials for optuna hyperparmaer optimization in each process, cf.
+                https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html#optuna.study.Study.optimize
+            n_jobs (int): The number of parallel jobs, 
+                cf. https://optuna.readthedocs.io/en/stable/reference/generated/optuna.study.Study.html#optuna.study.Study.optimize
+            outdir (Union[str, None]): String for defining a directory where all results are stored.
+            file_identifier (Union[str, None]): A user-defined string used for file identification 
+
         Note that self.optimal_encoding_circuit and self.best_trial, which are subsequently used in 
         run_quantum_kernel_optimization() and evaluate_model_from_optimized_qkernel, correspond to 
         the best parameters found during optuna optimization for last encoding circuit in list 
